@@ -1,0 +1,42 @@
+import java.io.DataInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.Scanner;
+
+import Server.ClientHandler;
+
+public class Client {
+	private static Socket socket;
+	
+	public static void main(String[] args) throws Exception
+	{
+		String serverAddress = "127.0.0.1";
+		int port = 5050;
+		
+		socket = new Socket(serverAddress, port);
+		
+		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
+		
+		DataInputStream in = new DataInputStream(socket.getInputStream());
+		String helloMessageFromServer = in.readUTF();
+		System.out.println(helloMessageFromServer);
+		
+		ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
+		Scanner input = new Scanner(System.in);
+		
+		try
+		{
+			while(true)
+			{
+
+		    	String myFloat = input.nextLine();
+				objectOutput.writeChars("tastistne");
+			}
+		}
+		finally
+		{
+			socket.close();
+			input.close();
+		}
+	}
+}

@@ -1,0 +1,54 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
+import java.util.Scanner;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.File;
+
+public class Client {
+	private static Socket socket;
+	
+	public static void main(String[] args) throws Exception
+	{
+		String serverAddress = "127.0.0.1";
+		int port = 5049;
+		
+		socket = new Socket(serverAddress, port);
+		
+		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
+		
+		DataInputStream in = new DataInputStream(socket.getInputStream());
+		String helloMessageFromServer = in.readUTF();
+		System.out.println(helloMessageFromServer);
+		
+		DataOutputStream objectOutput = new DataOutputStream(socket.getOutputStream());
+		Scanner input = new Scanner(System.in);
+		
+		try
+		{
+			while(true)
+			{
+
+		    	String myString = input.nextLine();
+		    	  File file = new File("M:\\test.xml");
+		          // Get the size of the file
+		          long length = file.length();
+		          byte[] bytes = new byte[16 * 1024];
+		          InputStream in = new FileInputStream(file);
+		          OutputStream out = socket.getOutputStream();
+
+		          int count;
+		          while ((count = in.read(bytes)) > 0) {
+		              out.write(bytes, 0, count);
+		          }
+				objectOutput.writeUTF(myString);
+			}
+		}
+		finally
+		{
+			socket.close();
+			input.close();
+		}
+	}
+}

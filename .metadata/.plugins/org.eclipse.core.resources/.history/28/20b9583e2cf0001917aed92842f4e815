@@ -1,0 +1,92 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class Server {
+	private static ServerSocket listener;
+	
+	
+	public static void main(String[] args) throws Exception
+	{
+		int clientNumber = 0;
+		String serverAddress = "127.0.0.1";
+		int serverPort = 5049;
+		
+		listener = new ServerSocket();
+		listener.setReuseAddress(true);
+		InetAddress serverIP = InetAddress.getByName(serverAddress);
+		listener.bind(new InetSocketAddress(serverIP, serverPort));
+		
+		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
+		try
+		{
+			while(true)
+			{
+				new ClientHandler(listener.accept(), clientNumber++).start();
+			}
+		}
+		finally
+		{
+			listener.close();
+		}
+		
+	}
+	private static class ClientHandler extends Thread
+	{
+		public Socket socket;
+		private int clientNumber;
+		
+		public ClientHandler(Socket socket, int clientNumber)
+		{
+			this.socket = socket;
+			this.clientNumber = clientNumber;
+			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
+		}
+		
+		public void run()
+		{
+			try
+			{
+				DataInputStream in = null;
+				DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+				out.writeUTF("allah yse3edne aa lynn #" + clientNumber);
+				while(true)
+				{
+					in = new DataInputStream(socket.getInputStream());
+					String strings = in.readUTF();
+					File[] files = new File("C:/").listFiles();
+					if(strings.equals("cd"))
+					{
+						Path currentRelativePath = Paths.get("");
+						String s = currentRelativePath.toString();
+						System.out.println("Current relative path is: " + s);
+					}
+					System.out.println("string recieved " + strings + "from client #" + clientNumber);
+				}
+			}
+			catch (IOException e)
+			{
+				System.out.format("Machkal ya 3edell" + clientNumber + " at "+ socket);
+				
+			}
+			finally
+			{
+				try
+				{					
+					socket.close();
+				}
+				catch (IOException e)
+				{
+					System.out.format("New Connection with clien #" + clientNumber + " at "+ socket);
+				}
+				System.out.format("New Connection with clien #" + clientNumber + " at "+ socket);
+			}
+		}
+	}
+}
