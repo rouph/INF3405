@@ -52,12 +52,22 @@ public class Server {
 		private int clientNumber;
 		private String currentPath;
 		DataOutputStream out;
-
+		DataInputStream in;
+		lsCommand commandTest;
 		public ClientHandler(Socket socket, int clientNumber)
 		{
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
+			try {
+				this.out = new DataOutputStream(this.socket.getOutputStream());
+				in = new DataInputStream(socket.getInputStream());
+			} catch (IOException e)
+			{
+				System.out.format("Machkal ya 3edell" + clientNumber + " at "+ socket);
+
+			}
+			commandTest = new lsCommand(this.out,this.in);
 		}
 
 		private class cmdLine
@@ -98,7 +108,7 @@ public class Server {
 					}
 					else if(ResolvedCmdLine.command.equals("ls"))
 					{
-						ls();
+						commandTest.execute(currentPath, ResolvedCmdLine.arg);
 					}
 					else if(ResolvedCmdLine.command.equals("mkdir"))
 					{
@@ -124,6 +134,19 @@ public class Server {
 			    	      System.out.println("File " + FILE_TO_RECEIVED + " downloaded (" + current + " bytes read)");
 			    	      bos.close();
 					}
+					else if (ResolvedCmdLine.command.equals("download"))
+					{
+						BufferedInputStream bis = null;
+						File myFile = new File (currentPath +  "\\" + ResolvedCmdLine.arg);
+						byte [] mybytearray  = new byte [(int)myFile.length()];
+						FileInputStream fis = new FileInputStream(myFile);
+						bis = new BufferedInputStream(fis);
+						bis.read(mybytearray,0,mybytearray.length);
+						System.out.println("Sending " + ResolvedCmdLine.arg + "(" + mybytearray.length + " bytes)");
+						out.write(mybytearray,0,mybytearray.length);
+						out.flush();
+						System.out.println("Done.");
+					}
 					System.out.println("string recieved " + ResolvedCmdLine.arg + " from client #" + clientNumber);
 				}
 			}
@@ -146,29 +169,7 @@ public class Server {
 				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
 			}
 		}
-		
-		private void ls()
-		{
-			StringBuilder builder = new StringBuilder();
-			File[] files = new File(currentPath).listFiles();
-			for (File file : files) {
-		        if (file.isDirectory()) {
-					builder.append( "Directory: " + file.getName());
-		        } else {
-					builder.append( "Directory: " + file.getName());
-		        }
-				builder.append("\r\n");
-		    }
 
-			try
-			{
-				out.writeUTF(builder.toString());
-			}
-			catch (IOException e)
-			{
-				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
-			}
-		}
 
 		private void resolveCmdLine(String iCmdLine, cmdLine oReSolvedCommand)
 		{

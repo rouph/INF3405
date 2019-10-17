@@ -52,10 +52,23 @@ public class Client {
 		    	{
 		    		objectOutput.writeUTF(myString);
 		    	}
+
 		    	if(myString.contains("ls"))
 				{
 					String test = in.readUTF();
 					System.out.println(test);
+				}
+		    	else if( myString.contains("download"))
+				{
+					byte [] mybytearray  = new byte [1024];
+					FileOutputStream fos = new FileOutputStream("this is a test.txt");
+					BufferedOutputStream bos = new BufferedOutputStream(fos);
+					int bytesRead = in.read(mybytearray,0,mybytearray.length);
+					int current = bytesRead;
+					bos.write(mybytearray, 0 , current);
+					bos.flush();
+					System.out.println("File " + "test file" + " downloaded (" + current + " bytes read)");
+					bos.close();
 				}
 			}
 		}
