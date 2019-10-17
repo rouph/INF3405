@@ -5,8 +5,6 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-import org.omg.CORBA.portable.OutputStream;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.File;
@@ -16,7 +14,7 @@ import java.io.InputStream;
 
 public class Client {
 	private static Socket socket;
-	public final static String FILE_TO_SEND = "C:\\Users\\lycha\\workspace\\file.txt";
+	public final static String FILE_TO_SEND = "C:\\Users\\elie\\Desktop\\INF3405\\INF3405\\file.txt";
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -34,7 +32,6 @@ public class Client {
 		DataOutputStream objectOutput = new DataOutputStream(socket.getOutputStream());
 		Scanner input = new Scanner(System.in);
 		BufferedInputStream bis = null;
-	    OutputStream os = null;
 		try
 		{
 			while(true)
@@ -58,6 +55,11 @@ public class Client {
 		    	{
 		    		objectOutput.writeUTF(myString);
 		    	}
+		    	if(myString.contains("ls"))
+				{
+					String test = in.readUTF();
+					System.out.println(test);
+				}
 			}
 		}
 		finally
@@ -66,7 +68,6 @@ public class Client {
 			input.close();
 
 			if (bis != null) bis.close();
-			if (os != null) os.close();
 		}
 	}
 }

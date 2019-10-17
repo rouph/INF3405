@@ -97,7 +97,6 @@ public class Server {
 						File file = new File(currentPath +  "\\" + strings);
 						if(file.isDirectory())
 						{
-							System.out.println("string recdsfghfdsgeved " + strings + " from client #" + clientNumber);
 							out.writeUTF("Un sous-répertoire ou un fichier "+strings+ " existe déjà." );
 						}
 						else if(!file.mkdirs())
@@ -142,14 +141,25 @@ public class Server {
 		
 		private void ls()
 		{
+			StringBuilder builder = new StringBuilder();
 			File[] files = new File(currentPath).listFiles();
 			for (File file : files) {
 		        if (file.isDirectory()) {
-		        	System.out.println("Directory: " + file.getName());
+					builder.append( "Directory: " + file.getName());
 		        } else {
-		            System.out.println("File: " + file.getName());
+					builder.append( "Directory: " + file.getName());
 		        }
+				builder.append("\r\n");
 		    }
+
+			try
+			{
+				out.writeUTF(builder.toString());
+			}
+			catch (IOException e)
+			{
+				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
+			}
 		}
 	}
 }
