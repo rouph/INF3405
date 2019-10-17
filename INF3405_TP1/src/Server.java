@@ -52,33 +52,42 @@ public class Server {
 		private int clientNumber;
 		private String currentPath;
 		DataOutputStream out;
+
 		public ClientHandler(Socket socket, int clientNumber)
 		{
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
 		}
-		
+
+		private class cmdLine
+		{
+			public cmdLine()
+			{
+				command = "";
+				arg = "";
+			}
+			public String command;
+			public String arg;
+		}
+
 		public void run()
 		{
 			try
 			{
 				DataInputStream in = null;
 				this.out = new DataOutputStream(this.socket.getOutputStream());
-				out.writeUTF("allah yse3edne aa lynn #" + clientNumber);
-
 				Path currentRelativePath = Paths.get("");
 				currentPath = currentRelativePath.toAbsolutePath().toString();
 				while(true)
 				{
 					in = new DataInputStream(socket.getInputStream());
-					String strings = in.readUTF();
-					String command = strings.substring(0, strings.indexOf(" "));
-					strings = strings.substring(strings.indexOf(" ")+1, strings.length());
-					if(command.equals("cd"))
+					String cmdLine = in.readUTF();
+					cmdLine ResolvedCmdLine = new cmdLine();
+					this.resolveCmdLine(cmdLine, ResolvedCmdLine );
+					if(ResolvedCmdLine.command.equals("cd"))
 					{
-						strings.trim();
-						currentRelativePath = Paths.get(currentPath +  "\\" + strings); 
+						currentRelativePath = Paths.get(currentPath +  "\\" + ResolvedCmdLine.arg);
 						File test = new File(currentRelativePath.toRealPath().toString());
 						 
 						if(test.isDirectory())
@@ -87,24 +96,23 @@ public class Server {
 							System.out.println("Current relative path is: " + currentPath);
 						}
 					}
-					else if(command.equals("ls"))
+					else if(ResolvedCmdLine.command.equals("ls"))
 					{
 						ls();
 					}
-					else if(command.equals("mkdir"))
+					else if(ResolvedCmdLine.command.equals("mkdir"))
 					{
-						strings.trim();
-						File file = new File(currentPath +  "\\" + strings);
+						File file = new File(currentPath +  "\\" + ResolvedCmdLine.arg);
 						if(file.isDirectory())
 						{
-							out.writeUTF("Un sous-répertoire ou un fichier "+strings+ " existe déjà." );
+							out.writeUTF("Un sous-répertoire ou un fichier "+ResolvedCmdLine.arg+ " existe déjà." );
 						}
 						else if(!file.mkdirs())
 						{
-							out.writeUTF("Une s'est produite. le ficher: " + strings + " n'a pu etre crée." );
+							out.writeUTF("Une erreur s'est produite. le ficher: " + ResolvedCmdLine.arg + " n'a pu etre crée." );
 						}
 					}
-					else if(command.equals("upload"))
+					else if(ResolvedCmdLine.command.equals("upload"))
 					{
 						 byte [] mybytearray  = new byte [FILE_SIZE];
 			    	      FileOutputStream fos = new FileOutputStream(FILE_TO_RECEIVED);
@@ -116,7 +124,7 @@ public class Server {
 			    	      System.out.println("File " + FILE_TO_RECEIVED + " downloaded (" + current + " bytes read)");
 			    	      bos.close();
 					}
-					System.out.println("string recieved " + strings + " from client #" + clientNumber);
+					System.out.println("string recieved " + ResolvedCmdLine.arg + " from client #" + clientNumber);
 				}
 			}
 			catch (IOException e)
@@ -159,6 +167,21 @@ public class Server {
 			catch (IOException e)
 			{
 				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
+			}
+		}
+
+		private void resolveCmdLine(String iCmdLine, cmdLine oReSolvedCommand)
+		{
+			int indexFirstSpace = iCmdLine.indexOf(" ");
+			if(indexFirstSpace > 0)
+			{
+				oReSolvedCommand.command = iCmdLine.substring(0, indexFirstSpace);
+				oReSolvedCommand.arg = iCmdLine.substring(iCmdLine.indexOf(" ")+1);
+			}
+			else
+			{
+				oReSolvedCommand.command = iCmdLine;
+				oReSolvedCommand.arg = "";
 			}
 		}
 	}

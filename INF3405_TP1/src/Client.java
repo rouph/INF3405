@@ -26,9 +26,6 @@ public class Client {
 		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
 		
 		DataInputStream in = new DataInputStream(socket.getInputStream());
-		String helloMessageFromServer = in.readUTF();
-		System.out.println(helloMessageFromServer);
-		
 		DataOutputStream objectOutput = new DataOutputStream(socket.getOutputStream());
 		Scanner input = new Scanner(System.in);
 		BufferedInputStream bis = null;
