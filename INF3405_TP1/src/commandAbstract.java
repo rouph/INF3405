@@ -10,5 +10,5 @@ public  abstract class commandAbstract {
     }
     protected DataOutputStream out;
     protected DataInputStream in;
-    public abstract void execute(String currentPath, String arg);
+    public abstract void execute(Changeable<String> currentPath, String arg);
 }

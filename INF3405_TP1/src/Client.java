@@ -60,8 +60,10 @@ public class Client {
 				}
 		    	else if( myString.contains("download"))
 				{
+
+					in = new DataInputStream(socket.getInputStream());
 					byte [] mybytearray  = new byte [1024];
-					FileOutputStream fos = new FileOutputStream("this is a test.txt");
+					FileOutputStream fos = new FileOutputStream("hghugahu.txt");
 					BufferedOutputStream bos = new BufferedOutputStream(fos);
 					int bytesRead = in.read(mybytearray,0,mybytearray.length);
 					int current = bytesRead;

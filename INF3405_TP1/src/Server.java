@@ -14,6 +14,8 @@ import java.nio.file.Paths;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Server {
 	private static ServerSocket listener;
@@ -50,12 +52,14 @@ public class Server {
 	{
 		public Socket socket;
 		private int clientNumber;
-		private String currentPath;
+		private Changeable currentPath;
 		DataOutputStream out;
 		DataInputStream in;
-		lsCommand commandTest;
+		Map<String, commandAbstract> commanders;
 		public ClientHandler(Socket socket, int clientNumber)
 		{
+			commanders = new HashMap<String, commandAbstract>();
+			currentPath = new Changeable("");
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
@@ -67,7 +71,11 @@ public class Server {
 				System.out.format("Machkal ya 3edell" + clientNumber + " at "+ socket);
 
 			}
-			commandTest = new lsCommand(this.out,this.in);
+			commanders.put("ls",new lsCommand(this.out,this.in) );
+			commanders.put("mkdir",new mkdirCommand(this.out,this.in) );
+			commanders.put("upload",new receiveCommand(this.out,this.in) );
+			commanders.put("download",new sendCommand(this.out,this.in) );
+			commanders.put("cd",new CdCommand(this.out,this.in) );
 		}
 
 		private class cmdLine
@@ -85,68 +93,16 @@ public class Server {
 		{
 			try
 			{
-				DataInputStream in = null;
 				this.out = new DataOutputStream(this.socket.getOutputStream());
 				Path currentRelativePath = Paths.get("");
-				currentPath = currentRelativePath.toAbsolutePath().toString();
+				currentPath.value = currentRelativePath.toAbsolutePath().toString();
 				while(true)
 				{
-					in = new DataInputStream(socket.getInputStream());
 					String cmdLine = in.readUTF();
 					cmdLine ResolvedCmdLine = new cmdLine();
 					this.resolveCmdLine(cmdLine, ResolvedCmdLine );
-					if(ResolvedCmdLine.command.equals("cd"))
-					{
-						currentRelativePath = Paths.get(currentPath +  "\\" + ResolvedCmdLine.arg);
-						File test = new File(currentRelativePath.toRealPath().toString());
-						 
-						if(test.isDirectory())
-						{
-							currentPath = test.getPath().toString();
-							System.out.println("Current relative path is: " + currentPath);
-						}
-					}
-					else if(ResolvedCmdLine.command.equals("ls"))
-					{
-						commandTest.execute(currentPath, ResolvedCmdLine.arg);
-					}
-					else if(ResolvedCmdLine.command.equals("mkdir"))
-					{
-						File file = new File(currentPath +  "\\" + ResolvedCmdLine.arg);
-						if(file.isDirectory())
-						{
-							out.writeUTF("Un sous-répertoire ou un fichier "+ResolvedCmdLine.arg+ " existe déjà." );
-						}
-						else if(!file.mkdirs())
-						{
-							out.writeUTF("Une erreur s'est produite. le ficher: " + ResolvedCmdLine.arg + " n'a pu etre crée." );
-						}
-					}
-					else if(ResolvedCmdLine.command.equals("upload"))
-					{
-						 byte [] mybytearray  = new byte [FILE_SIZE];
-			    	      FileOutputStream fos = new FileOutputStream(FILE_TO_RECEIVED);
-			    	      BufferedOutputStream bos = new BufferedOutputStream(fos);
-			    	      int bytesRead = in.read(mybytearray,0,mybytearray.length);
-			    	      int current = bytesRead;
-			    	      bos.write(mybytearray, 0 , current);
-			    	      bos.flush();
-			    	      System.out.println("File " + FILE_TO_RECEIVED + " downloaded (" + current + " bytes read)");
-			    	      bos.close();
-					}
-					else if (ResolvedCmdLine.command.equals("download"))
-					{
-						BufferedInputStream bis = null;
-						File myFile = new File (currentPath +  "\\" + ResolvedCmdLine.arg);
-						byte [] mybytearray  = new byte [(int)myFile.length()];
-						FileInputStream fis = new FileInputStream(myFile);
-						bis = new BufferedInputStream(fis);
-						bis.read(mybytearray,0,mybytearray.length);
-						System.out.println("Sending " + ResolvedCmdLine.arg + "(" + mybytearray.length + " bytes)");
-						out.write(mybytearray,0,mybytearray.length);
-						out.flush();
-						System.out.println("Done.");
-					}
+					this.commanders.get(ResolvedCmdLine.command).execute(this.currentPath, ResolvedCmdLine.arg);
+					System.out.println(currentPath);
 					System.out.println("string recieved " + ResolvedCmdLine.arg + " from client #" + clientNumber);
 				}
 			}
