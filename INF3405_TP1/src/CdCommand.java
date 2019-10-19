@@ -32,7 +32,7 @@ public class CdCommand extends commandAbstract  {
                     currentPath.value = test.getPath();
                     replyMessage = "Vous etes dans le dossier " + test.getName() + ".";
                 } else {
-                    out.writeUTF(arg + " n'est pas un repertoire valid");
+                    replyMessage = arg + " n'est pas un repertoire valid";
                 }
             }
             else

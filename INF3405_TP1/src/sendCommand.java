@@ -1,14 +1,15 @@
 import java.io.*;
 
 public class sendCommand extends commandAbstract {
-
-    public sendCommand(DataOutputStream out, DataInputStream in) {
+    private String type;
+    public sendCommand(DataOutputStream out, DataInputStream in, String iType) {
         super(out, in);
+        type = iType;
     }
 
     public void execute(Changeable<String> currentPath, String arg) {
         try {
-            out.writeUTF("download ");
+            out.writeUTF(type);
             BufferedInputStream bis = null;
             File myFile = new File(arg);
             byte[] mybytearray = new byte[(int) myFile.length()];

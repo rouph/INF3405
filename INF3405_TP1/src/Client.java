@@ -12,7 +12,7 @@ public class Client {
 	public final static String FILE_TO_SEND = "C:\\Users\\elie\\Desktop\\INF3405\\INF3405\\file.txt";
 	private static Scanner input = new Scanner(System.in);
 	private static DataInputStream in;
-	private static DataOutputStream objectOutput;
+	private static DataOutputStream out;
 
 	public static void main(String[] args) throws Exception
 	{
@@ -24,30 +24,29 @@ public class Client {
 		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
 		
 		in = new DataInputStream(socket.getInputStream());
-		objectOutput = new DataOutputStream(socket.getOutputStream());
+        out = new DataOutputStream(socket.getOutputStream());
 		Thread t1 = new Thread(() -> sendMessage()); t1.start();
+
+        Thread.currentThread().sleep(50);
 		Thread t2 = new Thread(() -> receive()); t2.start();
 	}       
 
 	public static void sendMessage()
 	{
+        sendCommand myCommand = new sendCommand(out,in, "upload ");
 		try {
 			while (true) {
                 lock.lock();
+
+                System.out.println("2");
 				String myString = input.nextLine();
-				objectOutput.writeUTF(myString);
+                out.writeUTF(myString);
                 if(myString.contains("upload"))
                 {
-                    File myFile = new File (FILE_TO_SEND);
-                    BufferedInputStream bis = null;
-                    byte [] mybytearray  = new byte [(int)myFile.length()];
-                    FileInputStream fis = new FileInputStream(myFile);
-                    bis = new BufferedInputStream(fis);
-                    bis.read(mybytearray,0,mybytearray.length);
-                    System.out.println("Sending " + FILE_TO_SEND + "(" + mybytearray.length + " bytes)");
-                    objectOutput.write(mybytearray,0,mybytearray.length);
-                    objectOutput.flush();
-                    System.out.println("Done.");
+                    Changeable<String> currentPath = new Changeable<String>("");
+                    Path currentRelativePath = Paths.get("");
+                    currentPath.value = currentRelativePath.toAbsolutePath().toString();
+                    myCommand.execute(currentPath, FILE_TO_SEND);
                 }
 				lock.unlock();
                 Thread.currentThread().sleep(50);
@@ -63,23 +62,20 @@ public class Client {
 	}
 	public static void receive()
 	{
+        receiveCommand myCommand = new receiveCommand(out, in);
 		try
 		{
 			while(true) {
                 lock.lock();
+
+                System.out.println("1");
                 String test = in.readUTF();
-                if(test.contains("download"))
+                if(test.contains("download "))
                 {
-                    in = new DataInputStream(socket.getInputStream());
-                    byte [] mybytearray  = new byte [1024];
-                    FileOutputStream fos = new FileOutputStream("hghugahu.txt");
-                    BufferedOutputStream bos = new BufferedOutputStream(fos);
-                    int bytesRead = in.read(mybytearray,0,mybytearray.length);
-                    int current = bytesRead;
-                    bos.write(mybytearray, 0 , current);
-                    bos.flush();
-                    System.out.println("File " + "test file" + " downloaded (" + current + " bytes read)");
-                    bos.close();
+                    Changeable<String> currentPath = new Changeable<String>("");
+                    Path currentRelativePath = Paths.get("");
+                    currentPath.value = currentRelativePath.toAbsolutePath().toString();
+                    myCommand.execute(currentPath, "");
                 }
                 else
                 {
