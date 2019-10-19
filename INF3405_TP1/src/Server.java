@@ -27,7 +27,7 @@ public class Server {
 	{
 		int clientNumber = 0;
 		String serverAddress = "127.0.0.1";
-		int serverPort = 5049;
+		int serverPort = 5048;
 		
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
@@ -101,8 +101,16 @@ public class Server {
 					String cmdLine = in.readUTF();
 					cmdLine ResolvedCmdLine = new cmdLine();
 					this.resolveCmdLine(cmdLine, ResolvedCmdLine );
-					this.commanders.get(ResolvedCmdLine.command).execute(this.currentPath, ResolvedCmdLine.arg);
-					System.out.println(currentPath);
+					commandAbstract currentCommand = this.commanders.get(ResolvedCmdLine.command);
+					if(currentCommand != null)
+					{
+						currentCommand.execute(this.currentPath, ResolvedCmdLine.arg);
+					}
+					else
+					{
+						out.writeUTF("La commande " + ResolvedCmdLine.command +" n'existe pas");
+						out.flush();
+					}
 					System.out.println("string recieved " + ResolvedCmdLine.arg + " from client #" + clientNumber);
 				}
 			}

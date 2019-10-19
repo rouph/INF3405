@@ -22,6 +22,11 @@ public class mkdirCommand extends commandAbstract {
             {
                 out.writeUTF("Une erreur s'est produite. le ficher: " + arg + " n'a pu etre crée." );
             }
+            else
+            {
+                out.writeUTF("Le dossier" + arg + "a été créé.");
+
+            }
         }
         catch (IOException e)
         {

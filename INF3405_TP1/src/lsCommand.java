@@ -12,6 +12,7 @@ public class lsCommand extends commandAbstract {
     public void execute(Changeable<String> currentPath, String arg)
     {
         StringBuilder builder = new StringBuilder();
+        builder.append("ls ");
         File[] files = new File(currentPath.value).listFiles();
         for (File file : files) {
             if (file.isDirectory()) {

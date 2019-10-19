@@ -8,6 +8,7 @@ public class sendCommand extends commandAbstract {
 
     public void execute(Changeable<String> currentPath, String arg) {
         try {
+            out.writeUTF("download ");
             BufferedInputStream bis = null;
             File myFile = new File(arg);
             byte[] mybytearray = new byte[(int) myFile.length()];
