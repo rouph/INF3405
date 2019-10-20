@@ -1,5 +1,8 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public  abstract class commandAbstract {
 
@@ -10,5 +13,20 @@ public  abstract class commandAbstract {
     }
     protected DataOutputStream out;
     protected DataInputStream in;
-    public abstract void execute(Changeable<String> currentPath, String arg);
+    public abstract void execute(Changeable<String> currentPath, String arg) throws IOException ;
+    
+    public boolean isValidFile(String path)
+    {
+    	boolean isValid = true;
+        Path currentRelativePath = Paths.get(path);
+ 		try
+         {
+             currentRelativePath.toRealPath().toString();
+         }
+         catch(IOException e)
+         {
+        	 isValid = false;
+         }
+    	return isValid;
+    }
 }

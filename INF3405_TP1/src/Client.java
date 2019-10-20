@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.nio.file.Path;
@@ -8,18 +9,21 @@ import java.nio.file.Paths;
 
 public class Client {
 	private static Socket socket;
-	private static Lock lock = new ReentrantLock();
-	public final static String FILE_TO_SEND = "C:\\Users\\elie\\Desktop\\INF3405\\INF3405\\file.txt";
-	private static Scanner input = new Scanner(System.in);
+	static Semaphore semaphorWrite;
+	static Semaphore semaphorRead;
+	private static Scanner input;
 	private static DataInputStream in;
 	private static DataOutputStream out;
 	private static sendCommand upload;
 	private static receiveCommand receiveFile;
+	
 	public static void main(String[] args) throws Exception
 	{
 		String serverAddress = "127.0.0.1";
 		int port = 5048;
-		
+		semaphorWrite = new Semaphore(1);
+		semaphorRead = new Semaphore(0);
+		input = new Scanner(System.in);
 		socket = new Socket(serverAddress, port);
 		
 		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
@@ -31,8 +35,6 @@ public class Client {
 
 		receiveFile = new receiveCommand(out, in);
 		Thread t1 = new Thread(() -> sendMessage()); t1.start();
-
-        Thread.currentThread().sleep(100);
 		Thread t2 = new Thread(() -> receive()); t2.start();
 	}       
 
@@ -40,23 +42,32 @@ public class Client {
 	{
 		try {
 			while (true) {
-                lock.lock();
-
-                System.out.println("2");
-				String myString = input.nextLine();
-                if(myString.contains("upload"))
+                semaphorWrite.acquire();
+				String cmdLine = input.nextLine();
+				CmdLine resolvedCmdLine = new CmdLine();
+				CmdLnHelper.resolveCmdLine(cmdLine, resolvedCmdLine);
+				if(resolvedCmdLine.command.equals("upload"))
                 {
-                    Changeable<String> currentPath = new Changeable<String>("");
+					Changeable<String> currentPath = new Changeable<String>("");
                     Path currentRelativePath = Paths.get("");
-                    currentPath.value = "C:\\Users\\elie\\Desktop\\INF3405\\INF3405\\";
-					upload.execute(currentPath, "file.txt");
+                    currentPath.value = currentRelativePath.toRealPath().toString();
+                    if(upload.isValidFile(currentPath.value + "\\" + resolvedCmdLine.arg))
+                    {
+                    	upload.execute(currentPath, resolvedCmdLine.arg);
+                        semaphorRead.release();
+                    }
+                    else
+                    {
+                        semaphorWrite.release();
+                        System.out.format("Ce fichier n'est pas valide. Verifier qu'il ce trouve dans le repertoire courrant (%s)", currentPath.value );
+                    }
                 }
                 else
 				{
-					out.writeUTF(myString);
+					out.writeUTF(cmdLine);
+					out.flush();
+	                semaphorRead.release();
 				}
-				lock.unlock();
-                Thread.currentThread().sleep(50);
 			}
 		}
 		catch (IOException e)
@@ -72,9 +83,7 @@ public class Client {
 		try
 		{
 			while(true) {
-                lock.lock();
-
-                System.out.println("1");
+                semaphorRead.acquire();
                 String test = in.readUTF();
                 if(test.contains("download "))
                 {
@@ -87,8 +96,7 @@ public class Client {
                 {
                     System.out.println(test);
                 }
-                lock.unlock();
-                Thread.currentThread().sleep(50);
+                semaphorWrite.release();
             }
 		}
 		catch (IOException e)

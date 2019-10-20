@@ -9,7 +9,7 @@ public class lsCommand extends commandAbstract {
     {
         super(out, in);
     }
-    public void execute(Changeable<String> currentPath, String arg)
+    public void execute(Changeable<String> currentPath, String arg) throws IOException 
     {
         StringBuilder builder = new StringBuilder();
         builder.append("ls ");
@@ -23,15 +23,7 @@ public class lsCommand extends commandAbstract {
             builder.append("\r\n");
         }
 
-        try
-        {
-            out.writeUTF(builder.toString());
-            out.flush();
-        }
-        catch (IOException e)
-        {
-            System.out.format("error");
-        }
-
+        out.writeUTF(builder.toString());
+        out.flush();
     }
 }

@@ -10,10 +10,8 @@ public class CdCommand extends commandAbstract  {
         super(out, in);
     }
 
-    public void execute(Changeable<String> currentPath, String arg) {
-
-        Path currentRelativePath = null;
-        currentRelativePath = Paths.get(currentPath + "\\" + arg);
+    public void execute(Changeable<String> currentPath, String arg) throws IOException  {
+        Path currentRelativePath = Paths.get(currentPath + "\\" + arg);
         boolean isValid = true;
         String replyMessage = "";
         try
@@ -24,28 +22,21 @@ public class CdCommand extends commandAbstract  {
         {
             isValid = false;
         }
-        try
-        {
-            if(isValid) {
-                File test = new File(currentRelativePath.toRealPath().toString());
-                if (test.isDirectory()) {
-                    currentPath.value = test.getPath();
-                    replyMessage = "Vous etes dans le dossier " + test.getName() + ".";
-                } else {
-                    replyMessage = arg + " n'est pas un repertoire valid";
-                }
-            }
-            else
-            {
+        if(isValid) {
+            File test = new File(currentRelativePath.toRealPath().toString());
+            if (test.isDirectory()) {
+                currentPath.value = test.getPath();
+                replyMessage = "Vous etes dans le dossier " + test.getName() + ".";
+            } else {
                 replyMessage = arg + " n'est pas un repertoire valid";
             }
-
-            out.writeUTF(replyMessage);
-            out.flush();
         }
-        catch (IOException e)
+        else
         {
-            System.out.println("error in CD command");
+            replyMessage = arg + " n'est pas un repertoire valid";
         }
+
+        out.writeUTF(replyMessage);
+        out.flush();
     }
 }

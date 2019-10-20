@@ -52,14 +52,14 @@ public class Server {
 	{
 		public Socket socket;
 		private int clientNumber;
-		private Changeable currentPath;
+		private Changeable<String> currentPath;
 		DataOutputStream out;
 		DataInputStream in;
 		Map<String, commandAbstract> commanders;
 		public ClientHandler(Socket socket, int clientNumber)
 		{
 			commanders = new HashMap<String, commandAbstract>();
-			currentPath = new Changeable("");
+			currentPath = new Changeable<String>("");
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
@@ -78,16 +78,7 @@ public class Server {
 			commanders.put("cd",new CdCommand(this.out,this.in) );
 		}
 
-		private class cmdLine
-		{
-			public cmdLine()
-			{
-				command = "";
-				arg = "";
-			}
-			public String command;
-			public String arg;
-		}
+		
 
 		public void run()
 		{
@@ -99,8 +90,8 @@ public class Server {
 				while(true)
 				{
 					String cmdLine = in.readUTF();
-					cmdLine ResolvedCmdLine = new cmdLine();
-					this.resolveCmdLine(cmdLine, ResolvedCmdLine );
+					CmdLine ResolvedCmdLine = new CmdLine();
+					CmdLnHelper.resolveCmdLine(cmdLine, ResolvedCmdLine );
 					commandAbstract currentCommand = this.commanders.get(ResolvedCmdLine.command);
 					if(currentCommand != null)
 					{
@@ -131,22 +122,6 @@ public class Server {
 					System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
 				}
 				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
-			}
-		}
-
-
-		private void resolveCmdLine(String iCmdLine, cmdLine oReSolvedCommand)
-		{
-			int indexFirstSpace = iCmdLine.indexOf(" ");
-			if(indexFirstSpace > 0)
-			{
-				oReSolvedCommand.command = iCmdLine.substring(0, indexFirstSpace);
-				oReSolvedCommand.arg = iCmdLine.substring(iCmdLine.indexOf(" ")+1);
-			}
-			else
-			{
-				oReSolvedCommand.command = iCmdLine;
-				oReSolvedCommand.arg = "";
 			}
 		}
 	}

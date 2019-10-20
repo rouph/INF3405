@@ -9,29 +9,21 @@ public class mkdirCommand extends commandAbstract {
     {
         super(out, in);
     }
-    public void execute(Changeable<String> currentPath, String arg)
+    public void execute(Changeable<String> currentPath, String arg) throws IOException 
     {
         File file = new File(currentPath.value +  "\\" + arg);
-        try
+        if(file.isDirectory())
         {
-            if(file.isDirectory())
-            {
-                out.writeUTF("Un sous-répertoire ou un fichier "+ arg+ " existe déjà." );
-            }
-            else if(!file.mkdirs())
-            {
-                out.writeUTF("Une erreur s'est produite. le ficher: " + arg + " n'a pu etre crée." );
-            }
-            else
-            {
-                out.writeUTF("Le dossier" + arg + "a été créé.");
-
-            }
+            out.writeUTF("Un sous-repertoire ou un fichier "+ arg+ " existe deja�." );
         }
-        catch (IOException e)
+        else if(!file.mkdirs())
         {
-            System.out.format("error");
+            out.writeUTF("Une erreur s'est produite. le ficher: " + arg + " n'a pu etre cree." );
         }
+        else
+        {
+            out.writeUTF("Le dossier " + arg + " a ete cree.");
 
+        }
     }
 }
