@@ -56,6 +56,7 @@ public class Server {
 		DataOutputStream out;
 		DataInputStream in;
 		Map<String, commandAbstract> commanders;
+
 		public ClientHandler(Socket socket, int clientNumber)
 		{
 			commanders = new HashMap<String, commandAbstract>();
@@ -63,12 +64,14 @@ public class Server {
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
-			try {
-				this.out = new DataOutputStream(this.socket.getOutputStream());
-				in = new DataInputStream(socket.getInputStream());
-			} catch (IOException e)
+			try 
 			{
-				System.out.format("Machkal ya 3edell" + clientNumber + " at "+ socket);
+				out = new DataOutputStream(this.socket.getOutputStream());
+				in = new DataInputStream(socket.getInputStream());
+			} 
+			catch (IOException e)
+			{
+				System.out.format("Client disconnected " + clientNumber + " at "+ socket);
 
 			}
 			commanders.put("ls",new lsCommand(this.out,this.in) );
@@ -91,7 +94,7 @@ public class Server {
 				{
 					String cmdLine = in.readUTF();
 					CmdLine ResolvedCmdLine = new CmdLine();
-					CmdLnHelper.resolveCmdLine(cmdLine, ResolvedCmdLine );
+					CmdLnHelper.resolveCmdLine(cmdLine, ResolvedCmdLine);
 					commandAbstract currentCommand = this.commanders.get(ResolvedCmdLine.command);
 					if(currentCommand != null)
 					{
@@ -102,7 +105,7 @@ public class Server {
 						out.writeUTF("La commande " + ResolvedCmdLine.command +" n'existe pas");
 						out.flush();
 					}
-					System.out.println("string recieved " + ResolvedCmdLine.arg + " from client #" + clientNumber);
+					System.out.println("["+socket.getInetAddress().toString().replace("/", "")+":"+socket.getPort() + " - "+java.time.LocalDateTime.now()+"] "+ cmdLine);
 				}
 			}
 			catch (IOException e)
