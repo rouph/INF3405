@@ -16,7 +16,7 @@ public class Client {
 	private static DataOutputStream out;
 	private static sendCommand upload;
 	private static receiveCommand receiveFile;
-	
+	private static Changeable<String> currentPath;
 	public static void main(String[] args) throws Exception
 	{
 		String serverAddress = "127.0.0.1";
@@ -26,6 +26,11 @@ public class Client {
 		input = new Scanner(System.in);
 		socket = new Socket(serverAddress, port);
 		
+
+        currentPath = new Changeable<String>("");
+        Path currentRelativePath = Paths.get("");
+        currentPath.value = currentRelativePath.toAbsolutePath().toString();
+        
 		System.out.format("The server is running on %s:%d%n",  serverAddress, port);
 		
 		in = new DataInputStream(socket.getInputStream());
@@ -33,24 +38,22 @@ public class Client {
 
 		upload = new sendCommand(out,in, "upload ");
 
-		receiveFile = new receiveCommand(out, in);
+		receiveFile = new receiveCommand(out, in, "download");
 		Thread t1 = new Thread(() -> sendMessage()); t1.start();
 		Thread t2 = new Thread(() -> receive()); t2.start();
 	}       
 
 	public static void sendMessage()
 	{
+
+		CmdLine resolvedCmdLine = new CmdLine();
 		try {
 			while (true) {
                 semaphorWrite.acquire();
 				String cmdLine = input.nextLine();
-				CmdLine resolvedCmdLine = new CmdLine();
 				CmdLnHelper.resolveCmdLine(cmdLine, resolvedCmdLine);
 				if(resolvedCmdLine.command.equals("upload"))
                 {
-					Changeable<String> currentPath = new Changeable<String>("");
-                    Path currentRelativePath = Paths.get("");
-                    currentPath.value = currentRelativePath.toRealPath().toString();
                     if(upload.isValidFile(currentPath.value + "\\" + resolvedCmdLine.arg))
                     {
                     	upload.execute(currentPath, resolvedCmdLine.arg);
@@ -78,23 +81,21 @@ public class Client {
             e.printStackTrace();
         }
 	}
+
 	public static void receive()
 	{
 		try
 		{
 			while(true) {
                 semaphorRead.acquire();
-                String test = in.readUTF();
-                if(test.contains("download "))
+                String receiveMsg = in.readUTF();
+                if(receiveMsg.contains("download "))
                 {
-                    Changeable<String> currentPath = new Changeable<String>("");
-                    Path currentRelativePath = Paths.get("");
-                    currentPath.value = currentRelativePath.toAbsolutePath().toString();
-					receiveFile.execute(currentPath, "12.txt");
+					receiveFile.execute(currentPath, "");
                 }
                 else
                 {
-                    System.out.println(test);
+                    System.out.println(receiveMsg);
                 }
                 semaphorWrite.release();
             }

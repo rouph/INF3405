@@ -2,8 +2,11 @@ import java.io.*;
 
 public class receiveCommand extends commandAbstract {
 
-    public receiveCommand(DataOutputStream out, DataInputStream in) {
+	private String type;
+	
+    public receiveCommand(DataOutputStream out, DataInputStream in, String iType) {
         super(out, in);
+		type = iType;
     }
 
     public void execute(Changeable<String> currentPath, String arg) throws IOException {
@@ -15,17 +18,23 @@ public class receiveCommand extends commandAbstract {
 	        byte [] mybytearray  = new byte [1024];
 	        fos = new FileOutputStream(currentPath.value +  "\\" + fileName);
 	        bos = new BufferedOutputStream(fos);
-	        int bytesRead = 0;
-	        int current = bytesRead;
+	        int current = 0;
 	
 	        while (current < fileSize) {
-	            bytesRead = in.read(mybytearray,0,mybytearray.length);
+	        	int bytesRead = in.read(mybytearray,0,mybytearray.length);
 	            bos.write(mybytearray, 0, bytesRead);
 	            current += bytesRead;
 	        }
 
 	        bos.flush();
-	        out.writeUTF("File " + fileName + " test (" + current + " bytes read)");
+	        if(type.contains("download"))
+    		{
+	        	System.out.println("Le fichier " + fileName + " à bien été téléchargé");
+    		}
+	        else
+	        {
+	        	out.writeUTF("Le fichier " + fileName + " à bien été téléversé");
+	        }
 	        out.flush();
 	        bos.close();
 			fos.close();

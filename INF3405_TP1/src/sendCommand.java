@@ -33,8 +33,6 @@ public class sendCommand extends commandAbstract {
 			
 			bis = new BufferedInputStream(fis);
 			bis.read(mybytearray, 0, mybytearray.length);
-
-			System.out.println("Sending " + arg + "(" + mybytearray.length + " bytes)");
 	
 			//send file name
 			out.writeUTF(arg);
@@ -46,7 +44,6 @@ public class sendCommand extends commandAbstract {
 			
 			fis.close();
 			bis.close();
-			System.out.println("Done.");
 		}
 		catch (IOException e)
 		{	

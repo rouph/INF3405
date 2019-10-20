@@ -73,7 +73,7 @@ public class Server {
 			}
 			commanders.put("ls",new lsCommand(this.out,this.in) );
 			commanders.put("mkdir",new mkdirCommand(this.out,this.in) );
-			commanders.put("upload",new receiveCommand(this.out,this.in) );
+			commanders.put("upload",new receiveCommand(this.out,this.in, "upload") );
 			commanders.put("download",new sendCommand(this.out,this.in, "download ") );
 			commanders.put("cd",new CdCommand(this.out,this.in) );
 		}

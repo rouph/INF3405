@@ -16,9 +16,9 @@ public class lsCommand extends commandAbstract {
         File[] files = new File(currentPath.value).listFiles();
         for (File file : files) {
             if (file.isDirectory()) {
-                builder.append( "Directory: " + file.getName());
+                builder.append( "[Folder] " + file.getName());
             } else {
-                builder.append( "File: " + file.getName());
+                builder.append( "[File] " + file.getName());
             }
             builder.append("\r\n");
         }
