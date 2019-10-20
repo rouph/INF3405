@@ -13,7 +13,8 @@ public class Client {
 	private static Scanner input = new Scanner(System.in);
 	private static DataInputStream in;
 	private static DataOutputStream out;
-
+	private static sendCommand upload;
+	private static receiveCommand receiveFile;
 	public static void main(String[] args) throws Exception
 	{
 		String serverAddress = "127.0.0.1";
@@ -25,36 +26,42 @@ public class Client {
 		
 		in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
+
+		upload = new sendCommand(out,in, "upload ");
+
+		receiveFile = new receiveCommand(out, in);
 		Thread t1 = new Thread(() -> sendMessage()); t1.start();
 
-        Thread.currentThread().sleep(50);
+        Thread.currentThread().sleep(100);
 		Thread t2 = new Thread(() -> receive()); t2.start();
 	}       
 
 	public static void sendMessage()
 	{
-        sendCommand myCommand = new sendCommand(out,in, "upload ");
 		try {
 			while (true) {
                 lock.lock();
 
                 System.out.println("2");
 				String myString = input.nextLine();
-                out.writeUTF(myString);
                 if(myString.contains("upload"))
                 {
                     Changeable<String> currentPath = new Changeable<String>("");
                     Path currentRelativePath = Paths.get("");
-                    currentPath.value = currentRelativePath.toAbsolutePath().toString();
-                    myCommand.execute(currentPath, FILE_TO_SEND);
+                    currentPath.value = "C:\\Users\\elie\\Desktop\\INF3405\\INF3405\\";
+					upload.execute(currentPath, "file.txt");
                 }
+                else
+				{
+					out.writeUTF(myString);
+				}
 				lock.unlock();
                 Thread.currentThread().sleep(50);
 			}
 		}
 		catch (IOException e)
 		{
-			System.out.format("error here");
+			System.out.format("error here fileName");
 		}
         catch (InterruptedException e) {
             e.printStackTrace();
@@ -62,7 +69,6 @@ public class Client {
 	}
 	public static void receive()
 	{
-        receiveCommand myCommand = new receiveCommand(out, in);
 		try
 		{
 			while(true) {
@@ -75,7 +81,7 @@ public class Client {
                     Changeable<String> currentPath = new Changeable<String>("");
                     Path currentRelativePath = Paths.get("");
                     currentPath.value = currentRelativePath.toAbsolutePath().toString();
-                    myCommand.execute(currentPath, "");
+					receiveFile.execute(currentPath, "12.txt");
                 }
                 else
                 {
@@ -87,7 +93,7 @@ public class Client {
 		}
 		catch (IOException e)
 		{
-			System.out.format("error here");
+			System.out.format("error here 134");
 		}
         catch (InterruptedException e) {
             e.printStackTrace();

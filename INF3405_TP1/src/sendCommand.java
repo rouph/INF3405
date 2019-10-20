@@ -11,19 +11,23 @@ public class sendCommand extends commandAbstract {
         try {
             out.writeUTF(type);
             BufferedInputStream bis = null;
-            File myFile = new File(arg);
+            File myFile = new File(currentPath+arg);
             byte[] mybytearray = new byte[(int) myFile.length()];
-            FileInputStream fis = new FileInputStream(arg);
+            FileInputStream fis = new FileInputStream(currentPath+arg);
             bis = new BufferedInputStream(fis);
             bis.read(mybytearray, 0, mybytearray.length);
             System.out.println("Sending " + arg + "(" + mybytearray.length + " bytes)");
+
+            out.writeUTF(arg);
+            out.writeLong(myFile.length());
+
             out.write(mybytearray, 0, mybytearray.length);
             out.flush();
             System.out.println("Done.");
         }
         catch (IOException e)
         {
-            System.out.format("error here");
+            System.out.format("error here 1587");
         }
     }
 }
