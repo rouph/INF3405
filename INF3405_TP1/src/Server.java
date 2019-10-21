@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class Server {
 	private static ServerSocket listener;
@@ -16,14 +17,45 @@ public class Server {
 	
 	public static void main(String[] args) throws Exception
 	{
+
+		Scanner input = new Scanner(System.in);
 		int clientNumber = 0;
 		String serverAddress = "127.0.0.1";
 		int serverPort = 5048;
-		
+
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
-		listener.bind(new InetSocketAddress(serverIP, serverPort));
+		boolean isValid = false;
+		while(!isValid){
+			System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
+
+			if(input.hasNextInt())
+			{
+				serverPort = input.nextInt();
+				if(serverPort >= 5000 && serverPort <= 5050) {
+					try {
+						listener.bind(new InetSocketAddress(serverIP, serverPort));
+						isValid = true;
+					}
+					catch(IOException e)
+					{
+
+						System.out.println("le port " + serverPort + " n'est pas disponible");
+						isValid = false;
+					}
+				}
+				else {
+					System.out.println("port doit etre entre 5000 et 5050");
+				}
+			}
+			else
+			{
+				input.nextLine();
+				System.out.println("port doit etre un nombre entre 5000 et 5050");
+			}
+		}
+
 		
 		System.out.format("The server is running on %s:%d%n", serverAddress, serverPort);
 		try
