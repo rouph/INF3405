@@ -136,27 +136,32 @@ public class Server {
 						out.writeUTF("La commande " + ResolvedCmdLine.command +" n'existe pas");
 						out.flush();
 					}
-					System.out.println("["+socket.getInetAddress().toString().replace("/", "")+":"+socket.getPort() + " - "+java.time.LocalDateTime.now()+"] "+ cmdLine);
+					printCommandReceived(cmdLine); 
 				}
 			}
 			catch (IOException e)
 			{
-				System.out.format("Machkal ya 3edell" + clientNumber + " at "+ socket);
+				System.out.format("Deconnexion de client #" + clientNumber + " at "+ socket);
 				
 			}
 			finally
 			{
 				try
-				{					
+				{		
+					out.close();
+					in.close();
 					socket.close();
 				}
 				catch (IOException e)
 				{
-					System.out.format("error");
+					System.out.format("Une erreur C'est Produite en fermant le socket");
 				}
 			}
 		}
-		
+		private void printCommandReceived(String cmdLine) {
+
+			System.out.println("["+socket.getInetAddress().toString().replace("/", "")+":"+socket.getPort() + " - "+java.time.LocalDateTime.now()+"] "+ cmdLine);
+		}
 		
 	}
 }

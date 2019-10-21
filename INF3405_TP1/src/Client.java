@@ -9,6 +9,7 @@ public class Client {
 	private static Socket socket;
 	static Semaphore semaphorWrite;
 	static Semaphore semaphorRead;
+	static Semaphore semaphorExit;
 	private static Scanner input;
 	private static DataInputStream in;
 	private static DataOutputStream out;
@@ -20,14 +21,21 @@ public class Client {
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
+
+	private static boolean error;
+	private static boolean exit;  
 	public static void main(String[] args) throws Exception {
+		error = false;
+		exit = false;
 		String serverAddress = "127.0.0.1";
 		
 		int port = 5048;
 		semaphorWrite = new Semaphore(1);
 		semaphorRead = new Semaphore(0);
+		semaphorExit = new Semaphore(0);
 		input = new Scanner(System.in);
 		boolean notValid = true;
+
 		while(notValid) {
 			serverAddress = getServerAddressFromCLient();
 			port = getServerPortFromCLient();
@@ -57,13 +65,22 @@ public class Client {
 		receiveFile = new receiveCommand(out, in, "download");
 		Thread t1 = new Thread(() -> sendMessage()); t1.start();
 		Thread t2 = new Thread(() -> receive()); t2.start();
+		semaphorExit.acquire();
+		out.close();
+		in.close();
+		socket.close();
+		
+		String message = error ? "une erreur avec le serveur c'est produite" : 
+								"Vous avez été déconnecté avec succès.";
+        System.out.println(message);
+		
 	}       
 
 	public static void sendMessage()
 	{
 		CmdLine resolvedCmdLine = new CmdLine();
 		try {
-			while (true) {
+			while (!exit) {
                 semaphorWrite.acquire();
 				String cmdLine = input.nextLine();
 				CmdLnHelper.resolveCmdLine(cmdLine, resolvedCmdLine);
@@ -80,6 +97,13 @@ public class Client {
                         System.out.format("Ce fichier n'est pas valide. Verifier qu'il ce trouve dans le repertoire courrant (%s)", currentPath.value );
                     }
                 }
+				else if(resolvedCmdLine.command.equals("exit"))
+				{
+
+					exit = true;
+	                semaphorRead.release();
+					semaphorExit.release();
+				}
                 else
 				{
 					out.writeUTF(cmdLine);
@@ -90,30 +114,40 @@ public class Client {
 		}
 		catch (IOException e)
 		{
+        	error = true;
+			semaphorExit.release();
 			System.out.format("error here fileName");
 		}
         catch (InterruptedException e) {
+
+        	error = true;
+			semaphorExit.release();
             e.printStackTrace();
         }
 	}
 
 	public static void receive() {
 		try {
-			while(true) {
+			while(!exit) {
                 semaphorRead.acquire();
-                String receiveMsg = in.readUTF();
-                if(receiveMsg.contains("download ")) {
-					receiveFile.execute(currentPath, "");
-                } else {
-                    System.out.println(receiveMsg);
+                if(!exit) {
+	                String receiveMsg = in.readUTF();
+	                if(receiveMsg.contains("download ")) {
+						receiveFile.execute(currentPath, "");
+	                } else {
+	                    System.out.println(receiveMsg);
+	                }
+	                semaphorWrite.release();
                 }
-                semaphorWrite.release();
             }
 		}
 		catch (IOException e) {
-			System.out.format("error here 134");
+        	error = true;
+			semaphorExit.release();
 		} 
-		catch (InterruptedException e) {
+        catch (InterruptedException e) {
+        	error = true;
+			semaphorExit.release();
             e.printStackTrace();
         }
 	}
