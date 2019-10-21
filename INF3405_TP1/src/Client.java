@@ -16,55 +16,27 @@ public class Client {
 	private static receiveCommand receiveFile;
 	private static Changeable<String> currentPath;
 	private static final String IPADDRESS_PATTERN =
-			"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
+					"^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\." +
 					"([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
-	public static void main(String[] args) throws Exception
-	{
+	public static void main(String[] args) throws Exception {
 		String serverAddress = "127.0.0.1";
 		
 		int port = 5048;
 		semaphorWrite = new Semaphore(1);
 		semaphorRead = new Semaphore(0);
 		input = new Scanner(System.in);
-		boolean isValid = false;
 		boolean notValid = true;
-		while(notValid)
-		{
-			while (!isValid) {
-				System.out.println("SVP saisire le adresse IP du server");
-				serverAddress = input.nextLine();
-				if (serverAddress.matches(IPADDRESS_PATTERN)) {
-					isValid = true;
-				} else {
-					System.out.println("format non valide. le IP addresse doit etres sous la forme : 255.255.255.255");
-				}
-			}
-			isValid = false;
-			while (!isValid) {
-				System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
+		while(notValid) {
+			serverAddress = getServerAddressFromCLient();
+			port = getServerPortFromCLient();
 
-				if (input.hasNextInt()) {
-					port = input.nextInt();
-					if (port >= 5000 && port <= 5050) {
-						isValid = true;
-					} else {
-						System.out.println("port doit etre entre 5000 et 5050");
-					}
-				} else {
-					input.nextLine();
-					System.out.println("port doit etre un nombre entre 5000 et 5050");
-				}
-			}
-
-			try{
-				notValid =false;
+			try {
+				notValid = false;
 				socket = new Socket(serverAddress, port);
-			}catch(IOException e){
-
+			} catch(IOException e) {
 				System.out.format("Une erreur c'est produite SVP verifier que votre serveur est disponible et qu'il roule sur %s:%d%n \r\n",  serverAddress, port);
-				isValid = false;
 				notValid =true;
 			}
 		}
@@ -89,7 +61,6 @@ public class Client {
 
 	public static void sendMessage()
 	{
-
 		CmdLine resolvedCmdLine = new CmdLine();
 		try {
 			while (true) {
@@ -126,30 +97,63 @@ public class Client {
         }
 	}
 
-	public static void receive()
-	{
-		try
-		{
+	public static void receive() {
+		try {
 			while(true) {
                 semaphorRead.acquire();
                 String receiveMsg = in.readUTF();
-                if(receiveMsg.contains("download "))
-                {
+                if(receiveMsg.contains("download ")) {
 					receiveFile.execute(currentPath, "");
-                }
-                else
-                {
+                } else {
                     System.out.println(receiveMsg);
                 }
                 semaphorWrite.release();
             }
 		}
-		catch (IOException e)
-		{
+		catch (IOException e) {
 			System.out.format("error here 134");
-		}
-        catch (InterruptedException e) {
+		} 
+		catch (InterruptedException e) {
             e.printStackTrace();
         }
+	}
+	
+	private static String getServerAddressFromCLient() {
+		String serverAddress = "";
+		boolean isValid = false;
+		while (!isValid) {
+			System.out.println("SVP saisire le adresse IP du server");
+			serverAddress = input.nextLine();
+			if (serverAddress.matches(IPADDRESS_PATTERN)) {
+				isValid = true;
+			} else {
+				System.out.println("format non valide. le IP addresse doit etres sous la forme : 255.255.255.255");
+			}
+		}
+
+		return serverAddress;
+	}
+
+	private static int getServerPortFromCLient() {
+		int port = 0;
+		boolean isValid = false;
+		while (!isValid) {
+			System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
+
+			if (input.hasNextInt()) {
+				port = input.nextInt();
+				if (port >= 5000 && port <= 5050) {
+					input.nextLine();
+					isValid = true;
+				} else {
+					System.out.println("port doit etre entre 5000 et 5050");
+				}
+			} else {
+				input.next();  // empty the scanner
+				System.out.println("port doit etre un nombre entre 5000 et 5050");
+			}
+		}
+
+		return port;
 	}
 }

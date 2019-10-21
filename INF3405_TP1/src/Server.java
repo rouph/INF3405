@@ -18,7 +18,6 @@ public class Server {
 	public static void main(String[] args) throws Exception
 	{
 
-		Scanner input = new Scanner(System.in);
 		int clientNumber = 0;
 		String serverAddress = "127.0.0.1";
 		int serverPort = 5048;
@@ -28,31 +27,16 @@ public class Server {
 		InetAddress serverIP = InetAddress.getByName(serverAddress);
 		boolean isValid = false;
 		while(!isValid){
-			System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
-
-			if(input.hasNextInt())
-			{
-				serverPort = input.nextInt();
-				if(serverPort >= 5000 && serverPort <= 5050) {
-					try {
-						listener.bind(new InetSocketAddress(serverIP, serverPort));
-						isValid = true;
-					}
-					catch(IOException e)
-					{
-
-						System.out.println("le port " + serverPort + " n'est pas disponible");
-						isValid = false;
-					}
-				}
-				else {
-					System.out.println("port doit etre entre 5000 et 5050");
-				}
+			try {
+				serverPort = getServerPortFromCLient();
+				listener.bind(new InetSocketAddress(serverIP, serverPort));
+				isValid = true;
 			}
-			else
+			catch(IOException e)
 			{
-				input.nextLine();
-				System.out.println("port doit etre un nombre entre 5000 et 5050");
+
+				System.out.println("le port " + serverPort + " n'est pas disponible");
+				isValid = false;
 			}
 		}
 
@@ -69,8 +53,32 @@ public class Server {
 		{
 			listener.close();
 		}
-		
 	}
+	
+	private static int getServerPortFromCLient() {
+		int port = 0;
+		boolean isValid = false;
+		Scanner input = new Scanner(System.in);
+		while (!isValid) {
+			System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
+
+			if (input.hasNextInt()) {
+				port = input.nextInt();
+				if (port >= 5000 && port <= 5050) {
+					input.nextLine(); // empty the scanner
+					isValid = true;
+				} else {
+					System.out.println("port doit etre entre 5000 et 5050");
+				}
+			} else {
+				input.next();
+				System.out.println("port doit etre un nombre entre 5000 et 5050");
+			}
+		}
+		input.close();
+		return port;
+	}
+	
 	private static class ClientHandler extends Thread
 	{
 		public Socket socket;
@@ -86,7 +94,7 @@ public class Server {
 			currentPath = new Changeable<String>("");
 			this.socket = socket;
 			this.clientNumber = clientNumber;
-			System.out.format("New Connection with clien #" + clientNumber + " at "+ socket +"\r\n");
+			System.out.format("New Connection with client #" + clientNumber + " at "+ socket +"\r\n");
 			try 
 			{
 				out = new DataOutputStream(this.socket.getOutputStream());
@@ -148,5 +156,7 @@ public class Server {
 				}
 			}
 		}
+		
+		
 	}
 }
