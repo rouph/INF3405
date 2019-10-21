@@ -2,8 +2,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -17,13 +15,21 @@ public class Client {
 	private static sendCommand upload;
 	private static receiveCommand receiveFile;
 	private static Changeable<String> currentPath;
+
 	public static void main(String[] args) throws Exception
 	{
 		String serverAddress = "127.0.0.1";
+		
 		int port = 5048;
 		semaphorWrite = new Semaphore(1);
 		semaphorRead = new Semaphore(0);
 		input = new Scanner(System.in);
+
+        System.out.println("SVP saisire le adresse IP du server");
+        serverAddress = input.nextLine();
+        System.out.println("SVP saisire le port d'ecoute du server");
+        port = input.nextInt();
+ 
 		socket = new Socket(serverAddress, port);
 		
 

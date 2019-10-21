@@ -9,6 +9,7 @@ public class lsCommand extends commandAbstract {
     {
         super(out, in);
     }
+
     public void execute(Changeable<String> currentPath, String arg) throws IOException 
     {
         StringBuilder builder = new StringBuilder();

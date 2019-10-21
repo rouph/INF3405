@@ -1,27 +1,18 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.util.Map;
 import java.util.HashMap;
 
 public class Server {
 	private static ServerSocket listener;
 
-	public final static String FILE_TO_RECEIVED = "file-rec.txt";
-	public final static int FILE_SIZE = 1024;
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -118,13 +109,11 @@ public class Server {
 				try
 				{					
 					socket.close();
-			       
 				}
 				catch (IOException e)
 				{
-					System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
+					System.out.format("error");
 				}
-				System.out.format("New Connection with client #" + clientNumber + " at "+ socket);
 			}
 		}
 	}
