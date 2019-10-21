@@ -15,7 +15,7 @@ public class mkdirCommand extends commandAbstract {
         File file = new File(currentPath.value +  "\\" + arg);
         if(file.isDirectory())
         {
-            out.writeUTF("Un sous-repertoire ou un fichier "+ arg+ " existe deja ." );
+            out.writeUTF("Un sous-repertoire ou un fichier "+ arg + " existe deja ." );
         }
         else if(!file.mkdirs())
         {
@@ -24,7 +24,6 @@ public class mkdirCommand extends commandAbstract {
         else
         {
             out.writeUTF("Le dossier " + arg + " a ete cree.");
-
         }
     }
 }

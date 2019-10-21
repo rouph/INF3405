@@ -19,7 +19,7 @@ public class sendCommand extends commandAbstract {
         {
             currentRelativePath.toRealPath().toString();
         }
-        catch(IOException e)
+        catch(IOException exception)
         {
 			out.writeUTF("file requested not valid");
 			return;
@@ -45,13 +45,13 @@ public class sendCommand extends commandAbstract {
 			fis.close();
 			bis.close();
 		}
-		catch (IOException e)
+		catch (IOException exception)
 		{	
 			if(fis != null)
 				fis.close();
 			if(bis != null)	
 				bis.close();
-			throw e;
+			throw exception;
 		}
 	}
 }

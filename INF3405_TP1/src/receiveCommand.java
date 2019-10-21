@@ -29,23 +29,23 @@ public class receiveCommand extends commandAbstract {
 	        bos.flush();
 	        if(type.contains("download"))
     		{
-	        	System.out.println("Le fichier " + fileName + " à bien été téléchargé");
+	        	System.out.println("Le fichier " + fileName + " a bien été téléchargé");
     		}
 	        else
 	        {
-	        	out.writeUTF("Le fichier " + fileName + " à bien été téléversé");
+	        	out.writeUTF("Le fichier " + fileName + " a bien été téléversé");
 	        }
 	        out.flush();
 	        bos.close();
 			fos.close();
 		}
-		catch (IOException e)
+		catch (IOException exception)
 		{	
 			if(fos != null)
 				fos.close();
 			if(bos != null)	
 				bos.close();
-			throw e;
+			throw exception;
 		}
     }
 }

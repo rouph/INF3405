@@ -17,16 +17,17 @@ public  abstract class commandAbstract {
     
     public boolean isValidFile(String path)
     {
-    	boolean isValid = true;
-        Path currentRelativePath = Paths.get(path);
- 		try
-         {
-             currentRelativePath.toRealPath().toString();
-         }
-         catch(IOException e)
-         {
-        	 isValid = false;
-         }
-    	return isValid;
+		boolean isValid = true;
+		Path currentRelativePath = Paths.get(path);
+		try
+		 {
+		     currentRelativePath.toRealPath().toString();
+		 }
+		 catch(IOException exception)
+		 {
+			 isValid = false;
+		 }
+
+		 return isValid;
     }
 }

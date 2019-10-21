@@ -10,17 +10,19 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.net.BindException;
 
 public class Server {
+	private static final String serverAddress = "127.0.0.1";
 	private static ServerSocket listener;
 
+	private static Scanner input;
 	
 	public static void main(String[] args) throws Exception
 	{
-
+		input = new Scanner(System.in);
 		int clientNumber = 0;
-		String serverAddress = "127.0.0.1";
-		int serverPort = 5048;
+		int serverPort = 0;
 
 		listener = new ServerSocket();
 		listener.setReuseAddress(true);
@@ -32,10 +34,9 @@ public class Server {
 				listener.bind(new InetSocketAddress(serverIP, serverPort));
 				isValid = true;
 			}
-			catch(IOException e)
+			catch(BindException e)
 			{
-
-				System.out.println("le port " + serverPort + " n'est pas disponible");
+				System.out.println("Le port " + serverPort + " n'est pas disponible");
 				isValid = false;
 			}
 		}
@@ -51,6 +52,7 @@ public class Server {
 		}
 		finally
 		{
+			input.close();
 			listener.close();
 		}
 	}
@@ -58,7 +60,6 @@ public class Server {
 	private static int getServerPortFromCLient() {
 		int port = 0;
 		boolean isValid = false;
-		Scanner input = new Scanner(System.in);
 		while (!isValid) {
 			System.out.println("Veuillez rentrer le port voulu pour le serveur (5000->5050) ");
 
@@ -75,7 +76,6 @@ public class Server {
 				System.out.println("port doit etre un nombre entre 5000 et 5050");
 			}
 		}
-		input.close();
 		return port;
 	}
 	
@@ -100,10 +100,9 @@ public class Server {
 				out = new DataOutputStream(this.socket.getOutputStream());
 				in = new DataInputStream(socket.getInputStream());
 			} 
-			catch (IOException e)
+			catch (IOException exception)
 			{
 				System.out.format("Client disconnected " + clientNumber + " at "+ socket);
-
 			}
 			commanders.put("ls",new lsCommand(this.out,this.in) );
 			commanders.put("mkdir",new mkdirCommand(this.out,this.in) );
@@ -139,9 +138,9 @@ public class Server {
 					printCommandReceived(cmdLine); 
 				}
 			}
-			catch (IOException e)
+			catch (IOException exception)
 			{
-				System.out.format("Deconnexion de client #" + clientNumber + " at "+ socket);
+				System.out.format("Deconnexion du client #" + clientNumber + " de "+ socket);
 				
 			}
 			finally
@@ -154,7 +153,7 @@ public class Server {
 				}
 				catch (IOException e)
 				{
-					System.out.format("Une erreur C'est Produite en fermant le socket");
+					System.out.format("Une erreur s'est Produite en fermant le socket");
 				}
 			}
 		}

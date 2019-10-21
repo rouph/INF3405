@@ -80,7 +80,7 @@ public class Client {
 	{
 		CmdLine resolvedCmdLine = new CmdLine();
 		try {
-			while (!exit) {
+			while (isConnected()) {
                 semaphorWrite.acquire();
 				String cmdLine = input.nextLine();
 				CmdLnHelper.resolveCmdLine(cmdLine, resolvedCmdLine);
@@ -115,12 +115,15 @@ public class Client {
 		catch (IOException e)
 		{
         	error = true;
+        	exit = true;
+            semaphorRead.release();
 			semaphorExit.release();
-			System.out.format("error here fileName");
 		}
         catch (InterruptedException e) {
 
         	error = true;
+        	exit=true;
+            semaphorRead.release();
 			semaphorExit.release();
             e.printStackTrace();
         }
@@ -128,9 +131,9 @@ public class Client {
 
 	public static void receive() {
 		try {
-			while(!exit) {
+			while(isConnected()) {
                 semaphorRead.acquire();
-                if(!exit) {
+                if(isConnected()) {
 	                String receiveMsg = in.readUTF();
 	                if(receiveMsg.contains("download ")) {
 						receiveFile.execute(currentPath, "");
@@ -143,10 +146,12 @@ public class Client {
 		}
 		catch (IOException e) {
         	error = true;
+        	exit=true;
 			semaphorExit.release();
 		} 
         catch (InterruptedException e) {
         	error = true;
+        	exit=true;
 			semaphorExit.release();
             e.printStackTrace();
         }
@@ -190,4 +195,10 @@ public class Client {
 
 		return port;
 	}
+	
+	private static boolean isConnected()
+	{
+		return !exit && !error;
+	}
+	
 }

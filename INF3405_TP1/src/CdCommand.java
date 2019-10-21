@@ -22,12 +22,12 @@ public class CdCommand extends commandAbstract  {
                 currentPath.value = file.getPath();
                 replyMessage = "Vous etes dans le dossier " + file.getName() + ".";
             } else {
-                replyMessage = arg + " n'est pas un repertoire valid";
+                replyMessage = arg + " n'est pas un repertoire valide";
             }
         }
         else
         {
-            replyMessage = arg + " n'est pas un repertoire valid";
+            replyMessage = arg + " n'est pas un repertoire valide";
         }
 
         out.writeUTF(replyMessage);
