@@ -27,9 +27,9 @@ public class Client {
 	public static void main(String[] args) throws Exception {
 		error = false;
 		exit = false;
-		String serverAddress = "127.0.0.1";
+		String serverAddress = "";
 		
-		int port = 5048;
+		int port = 0;
 		semaphorWrite = new Semaphore(1);
 		semaphorRead = new Semaphore(0);
 		semaphorExit = new Semaphore(0);
@@ -44,7 +44,7 @@ public class Client {
 				notValid = false;
 				socket = new Socket(serverAddress, port);
 			} catch(IOException e) {
-				System.out.format("Une erreur c'est produite SVP verifier que votre serveur est disponible et qu'il roule sur %s:%d%n \r\n",  serverAddress, port);
+				System.out.format("Une erreur s'est produite SVP vérifier que votre serveur est disponible et qu'il roule sur %s:%d%n \r\n",  serverAddress, port);
 				notValid =true;
 			}
 		}
@@ -70,7 +70,7 @@ public class Client {
 		in.close();
 		socket.close();
 		
-		String message = error ? "une erreur avec le serveur c'est produite" : 
+		String message = error ? "une erreur avec le serveur s'est produite" : 
 								"Vous avez été déconnecté avec succès.";
         System.out.println(message);
 		
@@ -94,7 +94,7 @@ public class Client {
                     else
                     {
                         semaphorWrite.release();
-                        System.out.format("Ce fichier n'est pas valide. Verifier qu'il ce trouve dans le repertoire courrant (%s)", currentPath.value );
+                        System.out.format("Ce fichier n'est pas valide. Vérifier qu'il se trouve dans le répertoire courrant (%s)", currentPath.value );
                     }
                 }
 				else if(resolvedCmdLine.command.equals("exit"))
@@ -112,20 +112,20 @@ public class Client {
 				}
 			}
 		}
-		catch (IOException e)
+		catch (IOException exception)
 		{
         	error = true;
         	exit = true;
             semaphorRead.release();
 			semaphorExit.release();
 		}
-        catch (InterruptedException e) {
+        catch (InterruptedException exception) {
 
         	error = true;
         	exit=true;
             semaphorRead.release();
 			semaphorExit.release();
-            e.printStackTrace();
+			exception.printStackTrace();
         }
 	}
 
@@ -144,16 +144,16 @@ public class Client {
                 }
             }
 		}
-		catch (IOException e) {
+		catch (IOException exception) {
         	error = true;
         	exit=true;
 			semaphorExit.release();
 		} 
-        catch (InterruptedException e) {
+        catch (InterruptedException exception) {
         	error = true;
         	exit=true;
 			semaphorExit.release();
-            e.printStackTrace();
+			exception.printStackTrace();
         }
 	}
 	
@@ -166,7 +166,7 @@ public class Client {
 			if (serverAddress.matches(IPADDRESS_PATTERN)) {
 				isValid = true;
 			} else {
-				System.out.println("format non valide. le IP addresse doit etres sous la forme : 255.255.255.255");
+				System.out.println("format non valide. L'adresse IP doit etre sous la forme : 255.255.255.255");
 			}
 		}
 
