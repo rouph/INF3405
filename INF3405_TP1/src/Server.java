@@ -95,13 +95,11 @@ public class Server {
 			this.socket = socket;
 			this.clientNumber = clientNumber;
 			System.out.format("New Connection with client #" + clientNumber + " at "+ socket +"\r\n");
-			try 
-			{
+			try {
 				out = new DataOutputStream(this.socket.getOutputStream());
 				in = new DataInputStream(socket.getInputStream());
 			} 
-			catch (IOException exception)
-			{
+			catch (IOException exception) {
 				System.out.format("Client disconnected " + clientNumber + " at "+ socket);
 			}
 			commanders.put("ls",new lsCommand(this.out,this.in) );

@@ -84,45 +84,38 @@ public class Client {
                 semaphorWrite.acquire();
 				String cmdLine = input.nextLine();
 				CmdLnHelper.resolveCmdLine(cmdLine, resolvedCmdLine);
-				if(resolvedCmdLine.command.equals("upload"))
-                {
-                    if(upload.isValidFile(currentPath.value + "\\" + resolvedCmdLine.arg))
-                    {
+				if(resolvedCmdLine.command.equals("upload")) {
+                    if(upload.isValidFile(currentPath.value + "\\" + resolvedCmdLine.arg)) {
                     	upload.execute(currentPath, resolvedCmdLine.arg);
                         semaphorRead.release();
                     }
-                    else
-                    {
+                    else {
                         semaphorWrite.release();
                         System.out.format("Ce fichier n'est pas valide. Vérifier qu'il se trouve dans le répertoire courrant (%s)", currentPath.value );
                     }
                 }
-				else if(resolvedCmdLine.command.equals("exit"))
-				{
+				else if(resolvedCmdLine.command.equals("exit")) {
 
 					exit = true;
 	                semaphorRead.release();
 					semaphorExit.release();
 				}
-                else
-				{
+                else {
 					out.writeUTF(cmdLine);
 					out.flush();
 	                semaphorRead.release();
 				}
 			}
 		}
-		catch (IOException exception)
-		{
+		catch (IOException exception) {
         	error = true;
         	exit = true;
             semaphorRead.release();
 			semaphorExit.release();
 		}
         catch (InterruptedException exception) {
-
         	error = true;
-        	exit=true;
+        	exit = true;
             semaphorRead.release();
 			semaphorExit.release();
 			exception.printStackTrace();
